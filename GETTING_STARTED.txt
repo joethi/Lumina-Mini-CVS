@@ -1,0 +1,316 @@
+================================================================================
+                    MINI-LUMINA - GETTING STARTED
+           A Production-Ready RAG System with MongoDB Atlas
+================================================================================
+
+PROJECT GENERATED: 34 files total
+├── 15 Python source files (backend + tests)
+├── 7 Documentation files
+├── 5 Configuration files
+├── 3 Docker files
+├── 2 Sample data files
+├── 1 GitHub Actions workflow
+├── 1 Shell script
+
+================================================================================
+                          QUICK START (5 MIN)
+================================================================================
+
+STEP 1: Configure Environment
+------------------------------
+cd /Users/jothimanithondiraj/Job_Prep/PainPoints/CVS/mini-lumina
+cp .env.example .env
+
+# Edit .env with your credentials:
+# - MONGO_URI (MongoDB Atlas connection string)
+# - OPENAI_API_KEY (OpenAI API key)
+
+STEP 2: Create MongoDB Vector Index
+------------------------------------
+1. Go to MongoDB Atlas → Search → Create Index
+2. Use JSON Editor, paste:
+   {
+     "mappings": {
+       "dynamic": true,
+       "fields": {
+         "embedding": {
+           "type": "knnVector",
+           "dimensions": 1536,
+           "similarity": "cosine"
+         }
+       }
+     }
+   }
+3. Name: vector_index
+4. Database: lumina, Collection: documents
+
+STEP 3: Install & Run
+---------------------
+chmod +x run.sh
+./run.sh
+
+# Or manually:
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+./run.sh all
+
+Access:
+- Backend: http://localhost:8000
+- Frontend: http://localhost:8501
+- API Docs: http://localhost:8000/docs
+
+STEP 4: Ingest Sample Data
+---------------------------
+./run.sh ingest sample_data/
+
+# Or manually:
+python -m app.ingestion sample_data/ml_basics.txt
+
+STEP 5: Test It!
+----------------
+Open http://localhost:8501
+Ask: "What is machine learning?"
+See results with sources!
+
+================================================================================
+                          ALTERNATIVE: DOCKER
+================================================================================
+
+docker-compose up --build
+
+# Access:
+# - Backend: http://localhost:8000
+# - Frontend: http://localhost:8501
+
+================================================================================
+                          AVAILABLE COMMANDS
+================================================================================
+
+./run.sh                      # Start both services
+./run.sh backend              # Backend only
+./run.sh frontend             # Frontend only
+./run.sh test                 # Run tests
+./run.sh ingest <path>        # Ingest documents
+./run.sh eval                 # Run evaluation
+./run.sh docker               # Docker Compose
+
+# Or using Makefile:
+make install                  # Install dependencies
+make test                     # Run tests with coverage
+make run-backend              # Start backend
+make run-frontend             # Start frontend
+make docker-up                # Docker Compose up
+make docker-down              # Docker Compose down
+make clean                    # Clean cache files
+
+================================================================================
+                          API TESTING
+================================================================================
+
+# Health check
+curl http://localhost:8000/healthz
+
+# Ask a question
+curl -X POST http://localhost:8000/ask \
+  -H "Content-Type: application/json" \
+  -d '{
+    "question": "What is machine learning?",
+    "top_k": 5,
+    "temperature": 0.7
+  }'
+
+================================================================================
+                          TESTING
+================================================================================
+
+# All tests
+pytest app/tests/ -v
+
+# With coverage
+pytest app/tests/ -v --cov=app --cov-report=html
+
+# Unit tests only
+pytest app/tests/ -v -m "not integration"
+
+# Specific test file
+pytest app/tests/test_api.py -v
+
+================================================================================
+                          EVALUATION
+================================================================================
+
+# Edit eval_dataset.csv with your test questions
+# Format: question,expected_doc_ids
+# Example: What is ML?,doc_1|doc_2
+
+python -m app.eval --dataset eval_dataset.csv --output eval_report.json
+
+# Results include:
+# - Precision@1, Precision@3, Precision@5
+# - Average retrieval latency
+# - Per-question details
+
+================================================================================
+                          AZURE DEPLOYMENT
+================================================================================
+
+1. Create Azure Resources:
+   az group create --name mini-lumina-rg --location eastus
+   az acr create --name miniluminaacr --resource-group mini-lumina-rg --sku Basic
+   az appservice plan create --name mini-lumina-plan --resource-group mini-lumina-rg --is-linux
+   az webapp create --name mini-lumina-api --plan mini-lumina-plan --resource-group mini-lumina-rg
+
+2. Configure GitHub Secrets:
+   - AZURE_CREDENTIALS
+   - ACR_LOGIN_SERVER
+   - ACR_USERNAME
+   - ACR_PASSWORD
+   - AZURE_WEBAPP_NAME
+   - MONGO_URI
+   - OPENAI_API_KEY
+
+3. Push to main:
+   git init
+   git add .
+   git commit -m "Initial commit"
+   git remote add origin <your-repo>
+   git push -u origin main
+
+4. GitHub Actions will automatically:
+   - Run tests
+   - Build Docker image
+   - Push to ACR
+   - Deploy to App Service
+
+5. Access your deployed app:
+   https://mini-lumina-api.azurewebsites.net/healthz
+
+================================================================================
+                          PROJECT STRUCTURE
+================================================================================
+
+mini-lumina/
+├── app/                          # Backend application
+│   ├── main.py                   # FastAPI app (entry point)
+│   ├── config.py                 # Configuration
+│   ├── db.py                     # MongoDB client
+│   ├── embeddings.py             # OpenAI embeddings
+│   ├── ingestion.py              # Document processing
+│   ├── rag_engine.py             # RAG pipeline
+│   ├── utils.py                  # Logging utilities
+│   ├── eval.py                   # Evaluation script
+│   └── tests/                    # Test suite
+├── streamlit_app/                # Frontend UI
+│   └── app.py                    # Streamlit app
+├── sample_data/                  # Sample documents
+├── .github/workflows/            # CI/CD pipeline
+├── README.md                     # Full documentation
+├── QUICKSTART.md                 # 5-minute guide
+├── ARCHITECTURE.md               # System architecture
+├── DEPLOYMENT_SUMMARY.md         # Deployment guide
+├── PROJECT_STRUCTURE.md          # File organization
+├── requirements.txt              # Dependencies
+├── Dockerfile                    # Backend container
+├── docker-compose.yml            # Multi-service setup
+└── run.sh                        # Startup script
+
+================================================================================
+                          DOCUMENTATION
+================================================================================
+
+Read these in order:
+
+1. README.md                      # Complete guide (start here)
+2. QUICKSTART.md                  # Get running in 5 minutes
+3. PROJECT_STRUCTURE.md           # File organization
+4. ARCHITECTURE.md                # System design
+5. DEPLOYMENT_SUMMARY.md          # Deployment checklist
+
+================================================================================
+                          KEY FEATURES
+================================================================================
+
+✅ MongoDB Atlas vector search (knnBeta)
+✅ OpenAI/Azure OpenAI embeddings & LLM
+✅ FastAPI REST API with /ask endpoint
+✅ Streamlit interactive frontend
+✅ Document ingestion (txt, pdf, markdown)
+✅ Text chunking with overlap
+✅ Comprehensive test suite (pytest)
+✅ Model evaluation framework
+✅ Docker containerization
+✅ CI/CD with GitHub Actions
+✅ Azure App Service deployment
+✅ Structured JSON logging
+✅ Error handling & retry logic
+✅ Health checks
+✅ API documentation (OpenAPI)
+
+================================================================================
+                          TROUBLESHOOTING
+================================================================================
+
+Problem: Backend won't start
+Solution: Check .env file exists, MongoDB URI is correct, port 8000 is free
+
+Problem: No results from queries
+Solution: Verify vector index is built in Atlas, documents are ingested
+
+Problem: MongoDB connection error
+Solution: Check IP whitelist in Atlas, verify connection string format
+
+Problem: OpenAI API error
+Solution: Verify API key is valid, check you have credits
+
+Problem: Docker build fails
+Solution: Run 'docker-compose down --rmi all' then rebuild
+
+Full troubleshooting guide: See DEPLOYMENT_SUMMARY.md
+
+================================================================================
+                          NEXT STEPS
+================================================================================
+
+After getting it running:
+
+1. Ingest your own documents
+2. Customize chunking parameters in .env
+3. Experiment with different models
+4. Run evaluation on your data
+5. Deploy to Azure
+6. Set up monitoring
+7. Add authentication
+8. Implement caching
+
+================================================================================
+                          SUPPORT
+================================================================================
+
+Documentation:
+- README.md - Full documentation
+- QUICKSTART.md - Quick setup
+- ARCHITECTURE.md - System design
+- API Docs - http://localhost:8000/docs
+
+Resources:
+- MongoDB Atlas: https://cloud.mongodb.com
+- OpenAI API: https://platform.openai.com
+- FastAPI: https://fastapi.tiangolo.com
+- Streamlit: https://docs.streamlit.io
+
+================================================================================
+                          LICENSE
+================================================================================
+
+MIT License - See LICENSE file
+
+================================================================================
+
+Ready to start? Run: ./run.sh
+
+Questions? Check README.md or DEPLOYMENT_SUMMARY.md
+
+Happy Building! 🚀
+
+================================================================================
