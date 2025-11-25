@@ -255,7 +255,8 @@ def test_ask_endpoint_special_characters(client, mock_rag_result):
 
 def test_cors_headers(client):
     """Test CORS headers are present."""
-    response = client.options("/ask")
+    # CORS headers are returned on actual requests, not OPTIONS
+    response = client.post("/ask", json={"question": "test"})
 
     # CORS headers should be present
     assert "access-control-allow-origin" in response.headers
